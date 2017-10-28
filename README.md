@@ -16,3 +16,9 @@ You can buy it from [taobao](https://item.taobao.com/item.htm?spm=a230r.1.14.80.
 * ethernet: setup the LAN8720A rmii phy 
 * web_radio: http client get the mp3 streaming and use tha libmad to decode
 * web_server: realize a simple webserver framework
+* bt_speaker: use A2DP to transfer music,44.2k 16bit 2 channel
+
+## User Manuel:
+You can find all information form [wiki](https://wiki.whyengineer.com)
+
+QQ Group:332026645
