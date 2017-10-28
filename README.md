@@ -1,23 +1,18 @@
-# ESP32_circle
+# WhyEngineer
+## ESP32_CIRCLE
 
-## hardware:
 <img src="https://wiki.whyengineer.com/images/c/c3/Esp32_480x480.png" width=256 height=256 />
 
-Know More:
-[WhyEngineer](https://www.whyengineer.com/esp32/)
+This is the first generate open source design of [WhyEngineer](https://www.whyengineer.com/).
 
-## software:
-The project use baidu [rest_api](http://yuyin.baidu.com/docs/asr/57), use the ESP32_circle board's mic collec voice send the fifo,
-the http thread read from fifo and use http chunked encode way to send these data to baidu.
+You can buy it from [taobao](https://item.taobao.com/item.htm?spm=a230r.1.14.80.b189741ebCoqa&id=557325579696&ns=1&abbucket=15#detail).
 
-Use my webserver framework to control the start and stop, the result will show in the web page.
+## Content:
+**The project contained the hardware schematic and some software demo based on the board**
 
-<img src="https://wiki.whyengineer.com/images/1/10/3.png"/>
-
-
-the delay about 1s.
-
-## how to use 
-change the componets/espressif/wifi.c wifi ssid and password
-
-copy the www folder to sd / directory
+* hardware：schematic
+* baidu_rest: use the mic and baidu's http rest api to realize a RSA(include a simple VAD)
+* ble_gateway: a simple ble device gateway
+* ethernet: setup the LAN8720A rmii phy 
+* web_radio: http client get the mp3 streaming and use tha libmad to decode
+* web_server: realize a simple webserver framework
