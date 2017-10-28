@@ -1,0 +1,293 @@
+<head>
+	<link href="https://cdn.bootcss.com/bootstrap/4.0.0-beta/css/bootstrap.css" rel="stylesheet">
+    <!-- <link href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet"> -->
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/tether/1.4.0/js/tether.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0-beta/js/bootstrap.min.js"></script>
+	<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.js"></script>
+    <link href="https://cdn.bootcss.com/bootstrap-table/1.11.1/bootstrap-table.min.css" rel="stylesheet">
+	<title>WhyEngineer</title>
+</head>
+<body>
+	<div class="container">
+		<h1 class="display-3">WhyEngineer-ESP32</h1>
+		<div style="text-align:center">
+			<img src="./static/logo.png" class="img-fluid img-thumbnail" alt="...">
+			<img src="./static/esp32.png" class="img-fluid img-thumbnail" alt="...">
+		</div>
+		<h3>This is a lightweight webserver framework for esp32</h3>
+		<h3>github: <a href="https://github.com/whyengineer/esp32"><i class="fa fa-github fa-lg"></i></a></h3>
+		<button type="button" class="btn btn-primary btn-lg btn-block" id="on">Turn On Led</button>
+		<button type="button" class="btn btn-secondary btn-lg btn-block" id="off">Turn Off Led</button>
+        <div>
+        <h1>BLE-Gateway:</h1>
+        </div>
+        <button type="button" class="btn btn-primary btn-lg btn-block" id="scan"><i class="fa fa-search fa-fw" aria-hidden="true"></i>Start Scan</button>
+        <div id="refresh" style="text-align: center;padding: 20px;pa">
+            <i class="fa fa-refresh fa-spin fa-5x fa-fw" aria-hidden="true"></i>       
+        </div>
+        <table id="table"></table>
+        <div id="connecting" style="text-align: center;">
+        	<h2>Connecting.....<i class="fa fa-spinner fa-pulse fa-1x fa-fw"></i></h2>		
+        </div>
+        <div id="control">
+            <div class="form-inline" style="margin: 20px" >
+              <label class="sr-only" for="inlineFormInput">Name</label>
+              <div class="input-group-addon">Sevice UUID</div>
+              <input type="text" class="form-control mb-2 mr-sm-2 mb-sm-0" id="service_uuid" placeholder="Service UUID">
+              <label class="sr-only" for="inlineFormInputGroup">Username</label>
+              <div class="input-group-addon">Characteristic UUID</div>
+              <div class="input-group mb-2 mr-sm-2 mb-sm-0">
+                <input type="text" class="form-control" id="char_uuid" placeholder="Char UUID">
+              </div>
+              <div class="form-check mb-2 mr-sm-2 mb-sm-0">
+               <select class="custom-select mb-2 mr-sm-2 mb-sm-0" id="way">
+                    <option selected value="0">Choose...</option>
+                    <option value="1">Read</option>
+                    <option value="2">Write</option>
+                    <option value="3">Description</option>
+                </select>
+              </div>
+              <button id="cmd_send" type="button" class="btn btn-primary">Send</button>
+            </div>
+            <div style="background-color: gray;height: 36px;vertical-align:middle;line-height: 36px;margin: 20px">
+                <p id="log">Log:</p>
+            </div>
+        </div>
+        <table id="table1" data-detail-view="true"></table>
+	</div>
+</body>
+<script type="application/javascript">
+	// device_info=[{"is_primary":true,"uuid":"1800","inst_id":0,"character":[{"prop":2,"uuid":"2a00"},{"prop":2,"uuid":"2a01"}]},{"is_primary":true,"uuid":"1801","inst_id":0,"character":[{"prop":32,"uuid":"2a05"}]},{"is_primary":true,"uuid":"6643ae107948f8a59145b4bb781e61d0","inst_id":0},{"is_primary":true,"uuid":"ae045ddc43d3909342456749e080a49f","inst_id":0},{"is_primary":true,"uuid":"180f","inst_id":0,"character":[{"prop":18,"uuid":"2a19"}]},{"is_primary":true,"uuid":"1805","inst_id":0,"character":[{"prop":18,"uuid":"2a2b"},{"prop":2,"uuid":"2a0f"}]},{"is_primary":true,"uuid":"180a","inst_id":0,"character":[{"prop":2,"uuid":"2a29"},{"prop":2,"uuid":"2a24"}]},{"is_primary":true,"uuid":"d0002d121e4b0fa4994eceb531f40579","inst_id":0},{"is_primary":true,"uuid":"dcf855ad02c5f48e3a43360f2b50d389","inst_id":0},{"is_primary":true,"uuid":"1811","inst_id":0,"character":[{"prop":2,"uuid":"2a48"},{"prop":16,"uuid":"2a46"},{"prop":136,"uuid":"2a44"},{"prop":2,"uuid":"2a47"},{"prop":16,"uuid":"2a45"}]}]
+    device_info=[]
+    //console.log(device_info)
+    var server_uuid
+    $("#refresh").hide();
+    $("#control").hide();
+    $("#connecting").hide();
+    $("#cmd_send").click(function(event){
+        console.log('send..')
+        $("#cmd_send").attr('disabled', 'true');
+        console.log($('#service_uuid').val())
+        console.log($('#char_uuid').val())
+        console.log($('#way').val())
+        var result={}
+        result.service_uuid=parseInt($('#service_uuid').val(),16)
+        result.char_uuid=parseInt($('#char_uuid').val(),16)
+        result.way=parseInt($('#way').val(),16)
+        d=JSON.stringify(result);
+        console.log(d)
+        $.ajax({
+            type: 'POST',
+            data: d,
+            url: "/api/ble_way/",
+            dataType: "json"
+        }).done(function (data) {
+           console.log(data) ;
+           if(data.err==0){
+             $('#log').html(data.content);
+           }else{
+              $('#log').html("ERROR : maybe the prop is not right");
+           }
+           $("#cmd_send").removeAttr("disabled");
+        });
+    })
+    $('#table').bootstrapTable({
+                        columns: [{
+                            field: 'id',
+                            title: 'Num'
+                        }, {
+                            field: 'name',
+                            title: 'Name'
+                        }, {
+                            field: 'rssi',
+                            title: 'RSSI'
+                        },{
+                            field: 'mac',
+                            title: 'MAC'
+                        }],
+                        height: 400,
+                        data: [
+                        ],
+                    });
+    // $('table').not('#table').on('dbl-click-row.bs.table', function (row, element, field){
+    //     console.log(server_uuid);
+    //     console.log(element);
+    // })
+    $("#scan").click(function(event) {
+                    $("#refresh").show();
+                    //$("#table").hide();
+                    $(this).attr('disabled', 'true');
+                    $('#table').bootstrapTable("removeAll");
+                    $.ajax({
+                        type: 'POST',
+                        url: "/api/ble_scan/",
+                        dataType: "json"
+                    }).done(function (data) {
+                        all_device=[];
+                        for (var i = 0; i < data.length; i++) {
+                            var item = { };
+                            item.id=data[i].id;
+                            item.name=data[i].name;
+                            item.rssi=data[i].rssi;
+                            item.mac=data[i].mac;
+                            all_device.push(item);
+                        }
+                        $("#refresh").hide();
+                        $("#table").bootstrapTable("append",all_device);
+                        $("#scan").removeAttr('disabled');
+                    });
+                });
+    $('#table').on('dbl-click-row.bs.table', function (row, element, field) {
+    	console.log("double click")
+    	$("#scan").attr('disabled', 'true');
+    	//$("#table").hide();
+    	$('#table').bootstrapTable("destroy");
+    	$("#connecting").show();
+    	b=element.mac.split(':');
+        c=[]
+        for(var i=0;i<6;i++){
+            console.log(b[i])
+            c.push(parseInt(b[i],16))
+        }
+        var result={}
+        result.mac0=c[0];
+        result.mac1=c[1];
+        result.mac2=c[2];
+        result.mac3=c[3];
+        result.mac4=c[4];
+        result.mac5=c[5];
+        d=JSON.stringify(result);
+        console.log(d)
+        $.ajax({
+            type: 'POST',
+            data: d,
+            url: "/api/ble_connect/",
+            dataType: "json"
+        }).done(function (data) {
+            console.log(data);
+            device_info=data;
+            $("#connecting").hide();
+            $("#control").show();
+            all_service=[]
+            for(var i=0;i<device_info.length;i++){
+                var item = { };
+                item.is_primary=device_info[i].is_primary;
+                item.uuid=device_info[i].uuid;
+                item.inst_id=device_info[i].inst_id;
+                if(device_info[i].character==undefined)
+                    item.char_num=0
+                else
+                    item.char_num=device_info[i].character.length
+                all_service.push(item);
+            }
+            //$("#table1").bootstrapTable("append",all_service);
+            $('#table1').bootstrapTable({
+                columns: [{
+                    field: 'is_primary',
+                    title: 'is_primary'
+                }, {
+                    field: 'inst_id',
+                    title: 'inst_id'
+                }, {
+                    field: 'uuid',
+                    title: 'uuid',
+                },{
+                    field: 'char_num',
+                    title: 'char_num'
+                }],
+                height: 800,
+                iconsPrefix:'fa',
+                icons:{
+                    detailOpen: 'fa-plus-circle fa-fw fa-2x',
+                    detailClose:'fa-minus-circle fa-fw fa-2x'
+                },
+                data:all_service,
+                detailView:true,
+                onExpandRow: function (index, row, $detail){
+                    // console.log(index)
+                    // console.log(row)
+                    // console.log($detail)
+                    if(device_info[index].character==undefined)
+                        return
+                    var data=[]
+                    var columns=[]
+                    if(row.char_num!=0){
+                        columns.push({
+                            field: 'uuid',
+                            title: 'uuid',
+                            
+                        });
+                        columns.push({
+                            field: 'prop',
+                            title: 'prop',
+                    
+                        });
+
+                    }
+                    server_uuid=device_info[index].uuid
+                    console.log(device_info[index])
+                    for(var i=0;i<device_info[index].character.length;i++){
+                        var item = { };
+                        item.uuid=device_info[index].character[i].uuid;
+                        var prop=device_info[index].character[i].prop
+                        p_viwe=""
+                        if(prop&0x01)
+                            p_viwe+=" BROADCAST"
+                        if(prop&0x02)
+                            p_viwe+=" READ"
+                        if(prop&0x04)
+                            p_viwe+=" WRITE_NR"
+                        if(prop&0x08)
+                            p_viwe+=" WRITE"
+                        if(prop&0x10)
+                            p_viwe+=" NOTIFY"
+                        if(prop&0x20)
+                            p_viwe+=" INDICATE"
+                        if(prop&0x40)
+                            p_viwe+=" AUTH"
+                        if(prop&0x80)
+                            p_viwe+=" EXT_PROP"
+                        item.prop=p_viwe;
+                        data.push(item);
+                    }
+                    $detail.html('<table></table>').find('table').bootstrapTable({
+                        columns: columns,
+                        data: data,
+                        radio :true,
+                    });
+                    
+                }
+            });
+        });
+	});
+	$("#on").click(function(event) {
+				console.log("click on") ;
+                $.ajax({
+                    type: 'POST',
+					data: "{\"led\":1}",
+                    url: "/api/led/",
+                    dataType: "json"
+                }).done(function (data) {
+                   console.log(data.err) ;
+                   if(data.err==0){
+                       console.log("led on");
+                    }
+                });
+            });
+	$("#off").click(function(event) {
+				console.log("click off") ;
+                $.ajax({
+                    type: 'POST',
+					data: "{\"led\":0}",
+                    url: "/api/led/",
+                    dataType: "json"
+                }).done(function (data) {
+                   console.log(data.err) ;
+                   if(data.err==0){
+                       console.log("led off");
+                    }
+                });
+            });
+</script>

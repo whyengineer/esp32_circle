@@ -1,0 +1,89 @@
+<head>
+	<link href="https://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcss.com/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://cdn.bootcss.com/tether/1.4.0/js/tether.min.js"></script>
+    <script src="https://cdn.bootcss.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"></script>
+	<link href="https://cdn.bootcss.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+	<title>WhyEngineer</title>
+</head>
+<body>
+	<div class="container">
+		<h1 class="display-3">WhyEngineer-ESP32</h1>
+		<div style="text-align:center">
+			<img src="./static/logo.png" class="img-fluid img-thumbnail" alt="...">
+			<img src="./static/esp32.png" class="img-fluid img-thumbnail" alt="...">
+		</div>
+		<h3>This is a lightweight webserver framework for esp32</h3>
+		<h3>github: <a href="https://github.com/whyengineer/esp32"><i class="fa fa-github fa-lg"></i></a></h3>
+		<button type="button" class="btn btn-primary btn-lg btn-block" id="on">Turn On Led</button>
+		<button type="button" class="btn btn-secondary btn-lg btn-block" id="off">Turn Off Led</button>
+        <p style="font-size: 24px;height: 32px;margin: 20px" id="content">Baidu Rest Api Test, Please Click!</p>
+        <div class="row justify-content-md-center" >
+            <button type="button" class="btn btn-primary btn-lg" id="record" style="margin: 20px"><i class="fa fa-play fa-5x"></i></button>
+            <button type="button" class="btn btn-danger btn-lg " id="stop" style="margin: 20px" disabled=""><i class="fa fa-stop fa-5x"></i></button>
+        </div>
+	</div>
+</body>
+<script type="application/javascript">
+	$("#on").click(function(event) {
+				console.log("click on") ;
+                $.ajax({
+                    type: 'POST',
+					data: "{\"led\":1}",
+                    url: "/api/led/",
+                    dataType: "json"
+                }).done(function (data) {
+                   console.log(data.err) ;
+                   if(data.err==0){
+                       console.log("led on");
+                    }
+                });
+            });
+	$("#off").click(function(event) {
+				console.log("click off") ;
+                $.ajax({
+                    type: 'POST',
+					data: "{\"led\":0}",
+                    url: "/api/led/",
+                    dataType: "json"
+                }).done(function (data) {
+                   console.log(data.err) ;
+                   if(data.err==0){
+                       console.log("led off");
+                    }
+                });
+            });
+    $("#record").click(function(event) {
+                
+                console.log("record") ;
+                $.ajax({
+                    type: 'POST',
+                    data: "{\"record\":1}",
+                    url: "/api/record/",
+                    dataType: "json"
+                }).done(function (data) {
+                   console.log(data.err) ;
+                   if(data.err==0){
+                        $("#content").text("Recording......Click To Stop  !");
+                        $('#stop').removeAttr('disabled');
+                        $('#record').attr('disabled', 'true');
+                    }
+                });
+            });
+    $("#stop").click(function(event) {
+                console.log("click on") ;
+                $.ajax({
+                    type: 'POST',
+                    data: "{\"record\":0}",
+                    url: "/api/record/",
+                    dataType: "json"
+                }).done(function (data) {
+                   console.log(data.err) ;
+                   if(data.err==0){
+                        $('#record').removeAttr('disabled');
+                        $('#stop').attr('disabled', 'true');
+                        $("#content").text(data.content);
+                    }
+                });
+            });
+</script>
